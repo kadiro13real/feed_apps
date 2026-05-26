@@ -1,5 +1,5 @@
 Flask
 requests
 gunicorn
-Flask‑SQLAlchemy
+Flask-SQLAlchemy
 Werkzeug
