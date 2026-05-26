@@ -148,7 +148,7 @@ def welcome():
 def keep_alive():
     while True:
         try:
-            requests.get("https://YOUR-RENDER-URL.onrender.com")
+            requests.get("https://feed-apps.onrender.com")
         except:
             pass
         time.sleep(600)  # ping every 10 minutes
