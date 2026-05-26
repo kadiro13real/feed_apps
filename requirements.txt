@@ -2,4 +2,5 @@ Flask
 requests
 gunicorn
 Flask-SQLAlchemy
-Werkzeug
+Werkzeug==2.3.7
+
