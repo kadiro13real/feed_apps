@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet"> 
+    <title>{% block title %}Fishing Feed{% endblock %}</title>
+    <style>
+        .buttonb {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 150px;
+    height: 130px;
+    background: #ffffff;
+    color: rgb(0, 0, 0);
+    text-decoration: none;
+    border-radius: 50%;
+    font-size: 20px;
+    margin-right: 50px;
+    margin-left: 50px;
+    margin-top: 15px;
+    
+  } 
+  a.buttonb:hover {
+    background: #7d2222;
+}
+  a{
+  text-decoration: none;
+ color: rgb(0, 0, 0);
+}
+        .back{
+  margin: 0%;
+  padding: 0%;
+  border: 0px;
+}
+
+body{
+    background-color: rgb(31, 119, 220);
+      font-family: "Audiowide", sans-serif;
+      font-weight: 400;
+      font-style: normal;
+}
+
+.bottom-fixed {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background:rgb(31, 119, 220);
+    color: rgb(0, 0, 0);
+    text-align: center;
+    padding: 15px 0;
+}
+
+.back{
+    border: 7px solid #000000;
+}
+
+    </style>
+</head>
+<body>
+    <div style="position: relative; width:100%; height: 200px;">
+      <img class="back" src="{{ url_for('static', filename='images/backround.png') }}" style="width: 100%; height: 100%;" alt="Background image">
+      <a id="link" href="index.html"><img src="{{ url_for('static', filename='images/logo.png') }}" style="position: absolute; top: 0px; bottom: 50px; left: 50px; width: 400px; height: 200px;" alt="Overlay image"></a>
+    </div>
+    
+{% block content %}{% endblock %}
+
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
