@@ -3,4 +3,6 @@ requests
 gunicorn
 Flask-SQLAlchemy
 Werkzeug==2.3.7
+psycopg2-binary==2.9.9
+
 
