@@ -240,15 +240,21 @@ def friend_requests():
 
 @app.route("/send_request/<int:to_id>")
 def send_request(to_id):
-    from_user = current_user
+    if "user" not in session:
+        return redirect("/login")
+    from_user = session['user']
     to_user = Users.query.get(to_id)
     return send_friend_request(from_user, to_user)
 
 @app.route("/accept_request/<int:req_id>")
+if "user" not in session:
+    return redirect("/login")
 def accept_request(req_id):
     return accept_friend_request(req_id)
 
 @app.route("/reject_request/<int:req_id>")
+if "user" not in session:
+    return redirect("/login")
 def reject_request(req_id):
     return reject_friend_request(req_id)
 
