@@ -1,0 +1,5 @@
+{% for req in requests %}
+    <p>{{ req.from_user.username }} sent you a friend request</p>
+    <a href="/accept_request/{{ req.id }}">Accept</a>
+    <a href="/reject_request/{{ req.id }}">Reject</a>
+{% endfor %}
