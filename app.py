@@ -244,6 +244,8 @@ def send_request(username):
         return redirect("/login")
     from_user = session['user']
     to_user = Users3.query.filter_by(username=username).first()
+    if not to_user:
+        return f"User '{username}' not found"
     return send_friend_request(from_user, to_user)
 
 @app.route("/accept_request/<username>")
