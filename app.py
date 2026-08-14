@@ -252,7 +252,7 @@ def reject_request(req_id):
 def keep_alive():
     while True:
         try:
-            requests.get(https://feed-apps.onrender.com/")
+            requests.get("https://feed-apps.onrender.com/")
         except:
             pass
         time.sleep(600)  # ping every 10 minutes
