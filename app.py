@@ -14,12 +14,11 @@ app.secret_key = "supersecretkey"  # change this
 URI_KEY = os.getenv("URI_KEY")
 MAIL_PASS = os.getenv("MAIL_PASS")
 
-
 # Aiven PostgreSQL connection string (IMPORTANT: use postgresql:// not postgres://)
 app.config["SQLALCHEMY_DATABASE_URI"] = URI_KEY
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-page=""
+page = ""
 
 def build_message(subject, sender, recipient, body):
     msg = EmailMessage()
@@ -37,17 +36,17 @@ def send_email(msg):
 db = SQLAlchemy(app)
 
 # -------------------------
-# User Model
+# User Model + Friends
 # -------------------------
 
 friends = db.Table(
-    'friends',
-    db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
-    db.Column('friend_id', db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    "friends",
+    db.Column("user_id", db.Integer, db.ForeignKey("users3.id"), primary_key=True),
+    db.Column("friend_id", db.Integer, db.ForeignKey("users3.id"), primary_key=True),
 )
 
 class Users3(db.Model):
-    __tablename__ = 'users'
+    __tablename__ = "users3"
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
@@ -55,45 +54,39 @@ class Users3(db.Model):
     email = db.Column(db.String(200), nullable=False)
 
     friends = db.relationship(
-        'Users3',
+        "Users3",
         secondary=friends,
         primaryjoin=id == friends.c.user_id,
         secondaryjoin=id == friends.c.friend_id,
-        backref='friend_of'
+        backref="friend_of",
     )
 
 class FriendRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    from_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    to_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    from_id = db.Column(db.Integer, db.ForeignKey("users3.id"))
+    to_id = db.Column(db.Integer, db.ForeignKey("users3.id"))
     status = db.Column(db.String(20))  # pending, accepted, rejected
 
-    from_user = db.relationship('Users3', foreign_keys=[from_id])
-    to_user = db.relationship('Users3', foreign_keys=[to_id])
-
-
+    from_user = db.relationship("Users3", foreign_keys=[from_id])
+    to_user = db.relationship("Users3", foreign_keys=[to_id])
 
 
 def send_friend_request(from_user, to_user):
-    # cannot friend yourself
     if from_user.id == to_user.id:
         return "You cannot friend yourself"
 
-    # already friends?
     if to_user in from_user.friends:
         return "Already friends"
 
-    # existing pending request?
     existing = FriendRequest.query.filter_by(
         from_id=from_user.id,
         to_id=to_user.id,
-        status="pending"
+        status="pending",
     ).first()
 
     if existing:
         return "Request already sent"
 
-    # create new request
     req = FriendRequest(from_id=from_user.id, to_id=to_user.id, status="pending")
     db.session.add(req)
     db.session.commit()
@@ -107,7 +100,6 @@ def accept_friend_request(request_id):
     user = req.from_user
     friend = req.to_user
 
-    # mutual friendship
     user.friends.append(friend)
     friend.friends.append(user)
 
@@ -127,10 +119,8 @@ def reject_friend_request(request_id):
 def get_received_requests(user):
     return FriendRequest.query.filter_by(
         to_id=user.id,
-        status="pending"
+        status="pending",
     ).all()
-
-
 
 
 # -------------------------
@@ -145,30 +135,24 @@ def home():
 
 @app.route("/tournaments", methods=["GET", "POST"])
 def tournaments():
-    
     if "user" in session:
-        
-        return render_template("tournaments.html", user=session['user'])
+        return render_template("tournaments.html", user=session["user"])
     else:
         session["next"] = "/tournaments"
         return redirect("/login")
 
 @app.route("/fish_map", methods=["GET", "POST"])
 def fish_map():
-    
     if "user" in session:
-        
-        return render_template("map.html", user=session['user'])
+        return render_template("map.html", user=session["user"])
     else:
         session["next"] = "/fish_map"
         return redirect("/login")
 
 @app.route("/report", methods=["GET", "POST"])
 def report():
-    
     if "user" in session:
-        
-        return render_template("report.html", user=session['user'])
+        return render_template("report.html", user=session["user"])
     else:
         session["next"] = "/report"
         return redirect("/login")
@@ -180,10 +164,10 @@ def register():
         password = request.form["password"]
         email = request.form["email"]
 
-        # Check if username already exists
         existing_user = Users3.query.filter_by(username=username).first()
         if existing_user:
             return "Username already taken"
+
         existing_email = Users3.query.filter_by(email=email).first()
         if existing_email:
             return "email already taken"
@@ -193,13 +177,14 @@ def register():
         new_user = Users3(username=username, password=hashed, email=email)
         db.session.add(new_user)
         db.session.commit()
-        email = build_message(
+
+        msg = build_message(
             "FISHING FEED ACCOUNT",
             "fishingwebsiteinfo@gmail.com",
             email,
-            f"Thank You For making a fishing feed account {username}"
-            )
-        send_email(email)
+            f"Thank You For making a fishing feed account {username}",
+        )
+        send_email(msg)
 
         return redirect("/login")
 
@@ -217,7 +202,6 @@ def login():
 
         if user and check_password_hash(user.password, password):
             session["user"] = user.username
-            print(session.get("next", "/welcome"))
             return redirect(session.get("next", "/welcome"))
 
         return "Invalid username or password"
@@ -228,13 +212,14 @@ def login():
 def welcome():
     if "user" not in session:
         return redirect("/login")
-    return render_template("welcome.html", user=session['user'])
+    return render_template("welcome.html", user=session["user"])
 
 @app.route("/friend_requests")
 def friend_requests():
     if "user" not in session:
         return redirect("/login")
-    user = session['user']
+
+    user = Users3.query.filter_by(username=session["user"]).first()
     received = get_received_requests(user)
     return render_template("friend_requests.html", requests=received)
 
@@ -242,24 +227,25 @@ def friend_requests():
 def send_request(username):
     if "user" not in session:
         return redirect("/login")
-    from_user = session['user']
+
+    from_user = Users3.query.filter_by(username=session["user"]).first()
     to_user = Users3.query.filter_by(username=username).first()
+
     if not to_user:
         return f"User '{username}' not found"
+
     return send_friend_request(from_user, to_user)
 
-@app.route("/accept_request/<username>")
-def accept_request(username):
+@app.route("/accept_request/<int:req_id>")
+def accept_request(req_id):
     if "user" not in session:
         return redirect("/login")
-    req_id = Users3.query.filter_by(username=username).first()
     return accept_friend_request(req_id)
 
-@app.route("/reject_request/<username>")
-def reject_request(username):
+@app.route("/reject_request/<int:req_id>")
+def reject_request(req_id):
     if "user" not in session:
         return redirect("/login")
-    req_id = Users3.query.filter_by(username=username).first()
     return reject_friend_request(req_id)
 
 
@@ -269,7 +255,7 @@ def reject_request(username):
 def keep_alive():
     while True:
         try:
-            requests.get("https://feed-apps.onrender.com/")
+            requests.get("https://feed-apps.onrender.com")
         except:
             pass
         time.sleep(600)  # ping every 10 minutes
@@ -283,3 +269,4 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+
