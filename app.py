@@ -41,12 +41,12 @@ db = SQLAlchemy(app)
 
 friends = db.Table(
     "friends",
-    db.Column("user_id", db.Integer, db.ForeignKey("users3.id"), primary_key=True),
-    db.Column("friend_id", db.Integer, db.ForeignKey("users3.id"), primary_key=True),
+    db.Column("user_id", db.Integer, db.ForeignKey("users5.id"), primary_key=True),
+    db.Column("friend_id", db.Integer, db.ForeignKey("users5.id"), primary_key=True),
 )
 
-class Users3(db.Model):
-    __tablename__ = "users3"
+class Users5(db.Model):
+    __tablename__ = "users5"
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
@@ -54,7 +54,7 @@ class Users3(db.Model):
     email = db.Column(db.String(200), nullable=False)
 
     friends = db.relationship(
-        "Users3",
+        "Users5",
         secondary=friends,
         primaryjoin=id == friends.c.user_id,
         secondaryjoin=id == friends.c.friend_id,
@@ -63,12 +63,12 @@ class Users3(db.Model):
 
 class FriendRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    from_id = db.Column(db.Integer, db.ForeignKey("users3.id"))
-    to_id = db.Column(db.Integer, db.ForeignKey("users3.id"))
+    from_id = db.Column(db.Integer, db.ForeignKey("users5.id"))
+    to_id = db.Column(db.Integer, db.ForeignKey("users5.id"))
     status = db.Column(db.String(20))  # pending, accepted, rejected
 
-    from_user = db.relationship("Users3", foreign_keys=[from_id])
-    to_user = db.relationship("Users3", foreign_keys=[to_id])
+    from_user = db.relationship("Users5", foreign_keys=[from_id])
+    to_user = db.relationship("Users5", foreign_keys=[to_id])
 
 
 def send_friend_request(from_user, to_user):
@@ -164,17 +164,17 @@ def register():
         password = request.form["password"]
         email = request.form["email"]
 
-        existing_user = Users3.query.filter_by(username=username).first()
+        existing_user = Users5.query.filter_by(username=username).first()
         if existing_user:
             return "Username already taken"
 
-        existing_email = Users3.query.filter_by(email=email).first()
+        existing_email = Users5.query.filter_by(email=email).first()
         if existing_email:
             return "email already taken"
 
         hashed = generate_password_hash(password)
 
-        new_user = Users3(username=username, password=hashed, email=email)
+        new_user = Users5(username=username, password=hashed, email=email)
         db.session.add(new_user)
         db.session.commit()
 
@@ -198,7 +198,7 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        user = Users3.query.filter_by(username=username).first()
+        user = Users5.query.filter_by(username=username).first()
 
         if user and check_password_hash(user.password, password):
             session["user"] = user.username
@@ -219,7 +219,7 @@ def friend_requests():
     if "user" not in session:
         return redirect("/login")
 
-    user = Users3.query.filter_by(username=session["user"]).first()
+    user = Users5.query.filter_by(username=session["user"]).first()
     received = get_received_requests(user)
     return render_template("friend_requests.html", requests=received)
 
@@ -228,8 +228,8 @@ def send_request(username):
     if "user" not in session:
         return redirect("/login")
 
-    from_user = Users3.query.filter_by(username=session["user"]).first()
-    to_user = Users3.query.filter_by(username=username).first()
+    from_user = Users5.query.filter_by(username=session["user"]).first()
+    to_user = Users5.query.filter_by(username=username).first()
 
     if not to_user:
         return f"User '{username}' not found"
@@ -242,31 +242,4 @@ def accept_request(req_id):
         return redirect("/login")
     return accept_friend_request(req_id)
 
-@app.route("/reject_request/<int:req_id>")
-def reject_request(req_id):
-    if "user" not in session:
-        return redirect("/login")
-    return reject_friend_request(req_id)
-
-
-# -------------------------
-# Render Keep-Alive Thread
-# -------------------------
-def keep_alive():
-    while True:
-        try:
-            requests.get("https://feed-apps.onrender.com")
-        except:
-            pass
-        time.sleep(600)  # ping every 10 minutes
-
-threading.Thread(target=keep_alive, daemon=True).start()
-
-# -------------------------
-# Run App
-# -------------------------
-if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True)
 
