@@ -242,4 +242,8 @@ def accept_request(req_id):
         return redirect("/login")
     return accept_friend_request(req_id)
 
+@app.route("/debug_users")
+def debug_users():
+    return str([u.username for u in Users5.query.all()])
+
 
