@@ -238,24 +238,26 @@ def friend_requests():
     received = get_received_requests(user)
     return render_template("friend_requests.html", requests=received)
 
-@app.route("/send_request/<int:to_id>")
-def send_request(to_id):
+@app.route("/send_request/<username>")
+def send_request(username):
     if "user" not in session:
         return redirect("/login")
     from_user = session['user']
-    to_user = Users.query.get(to_id)
+    to_user = Users3.query.filter_by(username=username).first()
     return send_friend_request(from_user, to_user)
 
-@app.route("/accept_request/<int:req_id>")
-def accept_request(req_id):
+@app.route("/accept_request/<username>")
+def accept_request(username):
     if "user" not in session:
         return redirect("/login")
+    req_id = Users3.query.filter_by(username=username).first()
     return accept_friend_request(req_id)
 
-@app.route("/reject_request/<int:req_id>")
-def reject_request(req_id):
+@app.route("/reject_request/<username>")
+def reject_request(username):
     if "user" not in session:
         return redirect("/login")
+    req_id = Users3.query.filter_by(username=username).first()
     return reject_friend_request(req_id)
 
 
