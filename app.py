@@ -55,7 +55,7 @@ class Users3(db.Model):
     email = db.Column(db.String(200), nullable=False)
 
     friends = db.relationship(
-        'Users2',
+        'Users3',
         secondary=friends,
         primaryjoin=id == friends.c.user_id,
         secondaryjoin=id == friends.c.friend_id,
@@ -68,8 +68,8 @@ class FriendRequest(db.Model):
     to_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     status = db.Column(db.String(20))  # pending, accepted, rejected
 
-    from_user = db.relationship('Users2', foreign_keys=[from_id])
-    to_user = db.relationship('Users2', foreign_keys=[to_id])
+    from_user = db.relationship('Users3', foreign_keys=[from_id])
+    to_user = db.relationship('Users3', foreign_keys=[to_id])
 
 
 
