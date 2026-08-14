@@ -46,7 +46,7 @@ friends = db.Table(
     db.Column('friend_id', db.Integer, db.ForeignKey('users.id'), primary_key=True)
 )
 
-class Users2(db.Model):
+class Users3(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -181,16 +181,16 @@ def register():
         email = request.form["email"]
 
         # Check if username already exists
-        existing_user = Users2.query.filter_by(username=username).first()
+        existing_user = Users3.query.filter_by(username=username).first()
         if existing_user:
             return "Username already taken"
-        existing_email = Users2.query.filter_by(email=email).first()
+        existing_email = Users3.query.filter_by(email=email).first()
         if existing_email:
             return "email already taken"
 
         hashed = generate_password_hash(password)
 
-        new_user = Users2(username=username, password=hashed, email=email)
+        new_user = Users3(username=username, password=hashed, email=email)
         db.session.add(new_user)
         db.session.commit()
         email = build_message(
@@ -213,7 +213,7 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        user = Users2.query.filter_by(username=username).first()
+        user = Users3.query.filter_by(username=username).first()
 
         if user and check_password_hash(user.password, password):
             session["user"] = user.username
