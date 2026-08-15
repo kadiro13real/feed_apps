@@ -184,7 +184,7 @@ def register():
             email,
             f"Thank You For making a fishing feed account {username}",
         )
-        send_email(msg)
+        #send_email(msg)
 
         return redirect("/login")
 
@@ -214,18 +214,12 @@ def welcome():
         return redirect("/login")
     return render_template("welcome.html", user=session["user"])
 
-@app.route("/friend_requests")
-def friend_requests():
-    if "user" not in session:
-        return redirect("/login")
 
-    user = Users5.query.filter_by(username=session["user"]).first()
-    received = get_received_requests(user)
-    return render_template("friend_requests.html", requests=received)
 
 @app.route("/send_request/<username>")
 def send_request(username):
     if "user" not in session:
+        session["next"] = "/friends"
         return redirect("/login")
 
     from_user = Users5.query.filter_by(username=session["user"]).first()
@@ -239,11 +233,31 @@ def send_request(username):
 @app.route("/accept_request/<int:req_id>")
 def accept_request(req_id):
     if "user" not in session:
+        session["next"] = "/friends"
         return redirect("/login")
     return accept_friend_request(req_id)
 
-@app.route("/debug_users")
-def debug_users():
-    return str([u.username for u in Users5.query.all()])
+@app.route("/friends")
+def friends():
+    if "user" in session:
+        user = Users5.query.filter_by(username=session["user"]).first()
+        friend = [f.username for f in user.friends]
+        user2 = Users5.query.filter_by(username=session["user"]).first()
+        received = get_received_requests(user2)
+        return render_template("friends.html", user=session["user"], friends=friend, requests=received)
+    else:
+        session["next"] = "/friends"
+        return redirect("/login")
+    
+    
 
+
+
+# -------------------------
+# Run App
+# -------------------------
+if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)
 
