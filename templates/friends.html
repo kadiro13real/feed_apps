@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Friends{% endblock %}
+
+{% block content %}
+<h1>FRIENDS</h1>
+<h4>Welcome {{ user }}</h4>
+<a href="/login">Logout</a>
+<h2>My Friends</h2>
+{% for fri in friends %}
+    <p> {{ fri }} </p>
+{% endfor %}
+<h2>Add Friend</h2>
+<form id="urlForm">
+  <label for="textInput">Enter Data:</label>
+  <input type="text" id="textInput" required>
+  <button type="submit">Submit</button>
+</form>
+
+<script>
+document.getElementById('urlForm').addEventListener('submit', function(event) {
+  event.preventDefault(); // Stop standard form submission
+
+  // Get the input value and encode it safely for a URL
+  const data = encodeURIComponent(document.getElementById('textInput').value);
+  
+  // Construct the clean URL path
+  const targetUrl = `/send_request/${data}`;
+
+  // Send the data to the server
+  fetch(targetUrl, { method: 'GET' })
+    .then(response => response.json())
+    .then(result => console.log('Server response:', result))
+    .catch(error => console.error('Error:', error));
+});
+</script>
+
+</form>
+<h2>Friend Requests:</h2>
+
+{% for req in requests %}
+    <p>{{ req.from_user.username }} sent you a friend request</p>
+    <a href="/accept_request/{{ req.id }}">Accept</a>
+    <a href="/reject_request/{{ req.id }}">Reject</a>
+{% endfor %}
+
+{% endblock %}
