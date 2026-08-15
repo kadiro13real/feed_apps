@@ -10,6 +10,19 @@ from email.message import EmailMessage
 
 
 app = Flask(__name__)
+# -------------------------
+# KEEP RENDER APP ALIVE
+# -------------------------
+def keep_alive():
+    while True:
+        try:
+            requests.get("https://feed-apps.onrender.com")
+        except Exception:
+            pass
+        time.sleep(600)  # ping every 10 minutes
+
+threading.Thread(target=keep_alive, daemon=True).start()
+
 app.secret_key = "supersecretkey"  # change this
 URI_KEY = os.getenv("URI_KEY")
 MAIL_PASS = os.getenv("MAIL_PASS")
@@ -248,6 +261,14 @@ def friends():
     else:
         session["next"] = "/friends"
         return redirect("/login")
+
+@app.route("/reject_request/<int:req_id>")
+def reject_request(req_id):
+    if "user" not in session:
+        session["next"] = "/friends"
+        return redirect("/login")
+    return reject_friend_request(req_id)
+
     
     
 
